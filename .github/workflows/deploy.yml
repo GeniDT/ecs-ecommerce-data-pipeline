@@ -7,8 +7,8 @@ on:
 
 env:
   AWS_REGION: eu-west-1
-  VALIDATION_REPO: 605134436600.dkr.ecr.eu-west-1.amazonaws.com/ecommerce-validation
-  TRANSFORMATION_REPO: 605134436600.dkr.ecr.eu-west-1.amazonaws.com/ecommerce-transformation
+  VALIDATION_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/ecommerce-validation
+  TRANSFORMATION_REPO: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com/ecommerce-transformation
   STEP_FUNCTION_NAME: ecommerce-kpi-state-machine
 
 jobs:
@@ -47,6 +47,9 @@ jobs:
         docker build -t $TRANSFORMATION_REPO:latest ./ecs/transformation
         docker push $TRANSFORMATION_REPO:latest
 
+    - name: Fill in AWS account ID
+      run: sed -i "s/<AWS_ACCOUNT_ID>/${{ secrets.AWS_ACCOUNT_ID }}/g" infra/step-function-definition.json
+
     - name: Deploy Step Function Definition
       run: |
         STATE_MACHINE_ARN=$(aws stepfunctions list-state-machines --query "stateMachines[?name=='$STEP_FUNCTION_NAME'].stateMachineArn" --output text)
@@ -55,7 +58,7 @@ jobs:
           echo "Creating Step Function..."
           aws stepfunctions create-state-machine \
             --name $STEP_FUNCTION_NAME \
-            --role-arn arn:aws:iam::605134436600:role/StepFunctionsECSExecutionRole \
+            --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/StepFunctionsECSExecutionRole \
             --definition file://infra/step-function-definition.json \
             --type STANDARD
         else
@@ -63,5 +66,5 @@ jobs:
           aws stepfunctions update-state-machine \
             --state-machine-arn $STATE_MACHINE_ARN \
             --definition file://infra/step-function-definition.json \
-            --role-arn arn:aws:iam::605134436600:role/StepFunctionsECSExecutionRole
+            --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/StepFunctionsECSExecutionRole
         fi
