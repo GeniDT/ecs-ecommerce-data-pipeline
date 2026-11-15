@@ -87,7 +87,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "TopicArn": "arn:aws:sns:eu-west-1:605134436600:ecommerce-pipeline-alerts",
+        "TopicArn": "arn:aws:sns:eu-west-1:<AWS_ACCOUNT_ID>:ecommerce-pipeline-alerts",
         "Message": {
           "Input.$": "$",
           "ErrorDetails.$": "$.error"
@@ -170,7 +170,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "TopicArn": "arn:aws:sns:eu-west-1:605134436600:ecommerce-pipeline-alerts",
+        "TopicArn": "arn:aws:sns:eu-west-1:<AWS_ACCOUNT_ID>:ecommerce-pipeline-alerts",
         "Message": {
           "Input.$": "$",
           "ErrorDetails.$": "$.error"
